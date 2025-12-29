@@ -83,16 +83,20 @@ def node_clustering_to_edge_clustering(adjacency, node_clustering):
     if sp.issparse(node_clustering):
         node_clustering = node_clustering.tocsr()
     elif isinstance(node_clustering, np.ndarray):
-        node_clustering = labels_array_to_sparse(node_clustering)
+        node_clustering = clustering_array_to_sparse(node_clustering)
     else:
         raise ValueError("node_clustering must be a scipy.sparse array or a 1d numpy array.")
     
-    node_clustering = node_clustering.tocsc()
-    edge_clustering = sp.lil_array((len(adjacency.indices), node_clustering.shape[0]), dtype="bool")
+    # Need fast access to clusters per node
+    node_clustering = node_clustering.transpose().tocsr()
+    edge_clustering = sp.lil_array((len(adjacency.indices), node_clustering.shape[1]), dtype="bool")
     edge_id = 0
     for n1 in range(len(adjacency.indptr)-1):
         for n2 in adjacency.indices[adjacency.indptr[n1]:adjacency.indptr[n1+1]]:
-            common_clusters = np.intersect1d(node_clustering[:, n1].indices, node_clustering[:, n2].indices)
+            common_clusters = np.intersect1d(
+                node_clustering.indices[node_clustering.indptr[n1]:node_clustering.indptr[n1+1]],
+                node_clustering.indices[node_clustering.indptr[n2]:node_clustering.indptr[n2+1]]
+                )
             edge_clustering[edge_id, common_clusters] = True
             edge_id += 1
     return edge_clustering.tocsc().transpose()
@@ -110,7 +114,7 @@ def edge_clustering_to_node_clustering(adjacency, edge_clustering):
     if sp.issparse(edge_clustering):
         edge_clustering = edge_clustering.tocsc()
     elif isinstance(node_clustering, np.ndarray):
-        edge_clustering = labels_array_to_sparse(edge_clustering)
+        edge_clustering = clustering_array_to_sparse(edge_clustering)
     else:
         raise ValueError("node_clustering must be a scipy.sparse array or a 1d numpy array.")
     
@@ -144,13 +148,13 @@ def fstar(c1, c2, outliers=True, drop_outliers=False):
     if sp.issparse(c1):
         c1 = c1.tocsr()
     elif isinstance(c1, np.ndarray):
-        c1 = labels_array_to_sparse(c1)
+        c1 = clustering_array_to_sparse(c1)
     else:
         raise ValueError("Fstar expects a scipy.sparse array or a 1d numpy array.")
     if sp.issparse(c2):
         c2 = c2.tocsr()
     elif isinstance(c2, np.ndarray):
-        c2 = labels_array_to_sparse(c2)
+        c2 = clustering_array_to_sparse(c2)
     else:
         raise ValueError("Fstar expects a scipy.sparse array or a 1d numpy array.")
 
