@@ -66,4 +66,4 @@ fstar.edge_clustering_to_node_clustering(adjacency, edge_clustering):
 
 
 ## Reference
-Paper coming soon!
+Ryan DeWolfe, Paweł Prałat, and François Théberge. A Pragmatic Method for Comparing Clusterings with Overlaps and Outliers. Arxiv Preprint (2026). [https://doi.org/10.48550/arXiv.2602.14855]([https://doi.org/10.48550/arXiv.2602.14855)
