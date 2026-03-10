@@ -113,7 +113,7 @@ def edge_clustering_to_node_clustering(adjacency, edge_clustering):
         raise ValueError("adjacency must be a scipy.sparse array.")
     if sp.issparse(edge_clustering):
         edge_clustering = edge_clustering.tocsc()
-    elif isinstance(node_clustering, np.ndarray):
+    elif isinstance(edge_clustering, np.ndarray):
         edge_clustering = clustering_array_to_sparse(edge_clustering)
     else:
         raise ValueError("node_clustering must be a scipy.sparse array or a 1d numpy array.")
@@ -211,8 +211,8 @@ def fstar(c1, c2, outliers=True, drop_outliers=False):
     intersect = c1.astype("float64") @ c2.transpose().astype("float64")
     rs = np.asarray(c1.sum(axis=1)).reshape(-1)  # row sums
     cs = np.asarray(c2.sum(axis=1)).reshape(-1)  # col sums
-    rd = sp.diags(rs)
-    cd = sp.diags(cs)
+    rd = sp.diags(rs, dtype="float64")
+    cd = sp.diags(cs, dtype="float64")
     nz = intersect.copy()  # Store non-zero data indices
     nz.data = np.ones_like(nz.data)
     union = rd @ nz + nz @ cd - intersect  # union is |p| + |l| - |p and l|
